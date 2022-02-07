@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-
-namespace WishBoxLibrary.DataAccess;
+﻿namespace WishBoxLibrary.DataAccess;
 
 public class MongoCategoryData : ICategoryData
 {
     private readonly IMongoCollection<CategoryModel> _categories;
-    private readonly IMemoryCache _cache;
-    private const string _cacheName = "CategoryData";
+    private readonly IMemoryCache                    _cache;
+    private const    string                          CACHE_NAME = "CategoryData";
 
     public MongoCategoryData(IDbConnection db, IMemoryCache cache)
     {
@@ -16,7 +14,7 @@ public class MongoCategoryData : ICategoryData
 
     public async Task<List<CategoryModel>> GetCategoriesAsync()
     {
-        var cachedResults = _cache.Get<List<CategoryModel>>(_cacheName);
+        var cachedResults = _cache.Get<List<CategoryModel>>(CACHE_NAME);
 
         // cache data if not cached
         if (cachedResults == null)
@@ -24,7 +22,7 @@ public class MongoCategoryData : ICategoryData
             var results = await _categories.FindAsync(_ => true);
             cachedResults = results.ToList();
 
-            _cache.Set(_cacheName, cachedResults, TimeSpan.FromDays(1));
+            _cache.Set(CACHE_NAME, cachedResults, TimeSpan.FromDays(1));
         }
 
         return cachedResults.ToList();
